@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ayatku - Proyek Ramadhan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #3498db;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 5px;
+        }
+        .surah, .hadist, .qibla-info {
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .surah h3, .hadist p, .qibla-info p {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ayatku - Proyek Ramadhan</h1>
+
+        <!-- Fitur Al-Qur'an -->
+        <div class="section">
+            <h2>Al-Qur'an</h2>
+            <div id="surah-list" class="surah">
+                <p>Memuat daftar surah...</p>
+            </div>
+        </div>
+
+        <!-- Fitur Hadist -->
+        <div class="section">
+            <h2>Hadist (HR. Bukhari)</h2>
+            <div id="hadist-list" class="hadist">
+                <p>Memuat daftar hadist...</p>
+            </div>
+        </div>
+
+        <!-- Fitur Arah Kiblat -->
+        <div class="section">
+            <h2>Arah Kiblat</h2>
+            <div id="qibla-direction" class="qibla-info">
+                <p>Memuat arah kiblat...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Proxy CORS
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+
+        // Fungsi untuk memuat daftar surah
+        async function loadSurah() {
+            try {
+                const apiUrl = 'https://api.alquran.cloud/v1/surah';
+                const response = await fetch(proxyUrl + apiUrl);
+                const data = await response.json();
+                const surahList = data.data;
+                const surahListHTML = surahList.map(surah => `
+                    <div class="surah">
+                        <h3>${surah.name || 'Nama surah tidak tersedia'}</h3>
+                        <p>Juz ${surah.juz || 'Juz tidak tersedia'}</p>
+                    </div>
+                `).join('');
+                document.getElementById('surah-list').innerHTML = surahListHTML;
+            } catch (error) {
+                document.getElementById('surah-list').innerHTML = `<p>Gagal memuat daftar surah.</p>`;
+            }
+        }
+
+        // Fungsi untuk memuat daftar hadist
+        async function loadHadist() {
+            try {
+                const apiUrl = 'https://api.hadith.sutanlab.id/books/bukhari?range=1-5';
+                const response = await fetch(proxyUrl + apiUrl);
+                const data = await response.json();
+                const hadistList = data.data.hadiths;
+                const hadistListHTML = hadistList.map(hadist => `
+                    <div class="hadist">
+                        <p><strong>${hadist.id || 'ID tidak tersedia'}</strong>: ${hadist.arab || 'Teks hadist tidak tersedia'}</p>
+                    </div>
+                `).join('');
+                document.getElementById('hadist-list').innerHTML = hadistListHTML;
+            } catch (error) {
+                document.getElementById('hadist-list').innerHTML = `<p>Gagal memuat daftar hadist.</p>`;
+            }
+        }
+
+        // Fungsi untuk memuat arah kiblat
+        async function loadQiblaDirection() {
+            try {
+                const latitude = -6.2088; // Ganti dengan latitude lokasi Anda
+                const longitude = 106.8456; // Ganti dengan longitude lokasi Anda
+                const apiUrl = `https://api.aladhan.com/v1/qibla/${latitude}/${longitude}`;
+                const response = await fetch(proxyUrl + apiUrl);
+                const data = await response.json();
+                const direction = data.data.direction || 'Arah kiblat tidak tersedia';
+                document.getElementById('qibla-direction').innerHTML = `
+                    <p>Arah Kiblat: ${direction} derajat</p>
+                `;
+            } catch (error) {
+                document.getElementById('qibla-direction').innerHTML = `<p>Gagal memuat arah kiblat.</p>`;
+            }
+        }
+
+        // Jalankan semua fungsi saat halaman dimuat
+        window.onload = () => {
+            loadSurah();
+            loadHadist();
+            loadQiblaDirection();
+        };
+    </script>
+</body>
+</html>
